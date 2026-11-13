@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>駅の追加</title>
+</head>
+<body>
+  <h1>駅の追加</h1>
+  <form action="/keiyo_add" method="get">
+    <p><label for="id">ID</label> <input type="number" id="id" name="id" min="1" required></p>
+    <p><label for="code">駅コード</label> <input type="text" id="code" name="code" required></p>
+    <p><label for="name">駅名</label> <input type="text" id="name" name="name" required></p>
+    <fieldset>
+      <legend>登録後の表示</legend>
+      <label><input type="radio" name="after" value="list" checked> 一覧</label>
+      <label><input type="radio" name="after" value="form"> 入力画面</label>
+    </fieldset>
+    <button type="submit">登録</button>
+  </form>
+  <p><a href="/keiyo?view=table">駅一覧へ戻る</a></p>
+  <p><a href="/public/index.html">トップへ戻る</a></p>
+</body>
+</html>
