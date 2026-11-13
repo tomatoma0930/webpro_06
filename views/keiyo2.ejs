@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>京葉線の駅一覧・詳細</title>
+</head>
+<body>
+  <h1>京葉線の駅一覧・詳細</h1>
+  <table>
+    <thead><tr><th>ID</th><th>駅コード</th><th>駅名（詳細へのリンク）</th></tr></thead>
+    <tbody>
+    <% for (let number = 0; number < data.length; number++) { %>
+      <% const row = data[number]; %>
+      <tr><td><%= row.id %></td><td><%= row.code %></td><td><a href="/keiyo2/<%= number %>"><%= row.name %></a></td></tr>
+    <% } %>
+    </tbody>
+  </table>
+  <p><a href="/public/keiyo2_add.html">詳細付きの駅を追加</a></p>
+  <p><a href="/public/index.html">トップへ戻る</a></p>
+</body>
+</html>

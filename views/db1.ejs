@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>京葉線の駅一覧</title>
+</head>
+<body>
+  <h1>京葉線の駅一覧</h1>
+  <ul>
+  <% for (const row of data) { %>
+    <li>ID: <%= row.id %>、駅コード: <%= row.code %>、駅名: <%= row.name %></li>
+  <% } %>
+  </ul>
+  <p><a href="/public/keiyo_add.html">駅を追加</a> / <a href="/keiyo">列挙で見る</a> / <a href="/keiyo?view=table">表で見る</a></p>
+  <p><a href="/public/index.html">トップへ戻る</a></p>
+</body>
+</html>

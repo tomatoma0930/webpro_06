@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= data.name %>の詳細</title>
+</head>
+<body>
+  <h1><%= data.name %>の詳細</h1>
+  <dl>
+    <dt>図鑑番号</dt><dd><%= String(data.number).padStart(4, '0') %></dd>
+    <dt>名前</dt><dd><%= data.name %></dd>
+    <dt>タイプ</dt><dd><%= data.type %></dd>
+    <dt>分類</dt><dd><%= data.category %></dd>
+    <dt>高さ</dt><dd><%= data.height %> m</dd>
+    <dt>重さ</dt><dd><%= data.weight %> kg</dd>
+  </dl>
+  <p><a href="/pokemon">図鑑に戻る</a></p>
+  <p><a href="/public/index.html">トップへ戻る</a></p>
+</body>
+</html>
