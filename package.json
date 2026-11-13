@@ -1,14 +1,14 @@
 {
-  "name": "node-http-server",
+  "name": "webpro-06",
   "version": "1.0.0",
-  "description": "Node.js example server starter project",
-  "main": "src/index.js",
+  "private": true,
+  "description": "Webプログラミング 第7〜9回",
+  "main": "app5.js",
   "scripts": {
-    "start": "node app4.js"
+    "start": "node app5.js"
   },
   "dependencies": {
-    "ejs": "^3.1.10",
-    "express": "^4.21.2"
-  },
-  "keywords": []
+    "express": "4.22.3",
+    "ejs": "3.1.10"
+  }
 }
