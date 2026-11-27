@@ -5,6 +5,8 @@ const app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
+app.use(express.urlencoded({ extended: true }));
+app.get('/public/keiyo2_add.html', (req, res) => res.redirect('/public/keiyo2_new.html'));
 app.use("/public", express.static(__dirname + "/public"));
 
 app.get("/janken", (req, res) => {
@@ -113,37 +115,87 @@ const station2 = [
   { id: 7, code: 'JE18', name: '蘇我駅', change: '内房線、外房線', passengers: 31328, distance: 43.0 }
 ];
 
+function station2Input(fields) {
+  const code = inputText(fields.code);
+  const name = inputText(fields.name);
+  const change = inputText(fields.change);
+  const passengerText = inputText(fields.passengers);
+  const distanceText = inputText(fields.distance);
+  const passengers = Number(passengerText);
+  const distance = Number(distanceText);
+  if (!code || !name || !passengerText || !Number.isSafeInteger(passengers) ||
+      passengers < 0 || !distanceText || !Number.isFinite(distance) || distance < 0) {
+    return null;
+  }
+  return { code, name, change, passengers, distance };
+}
+
+function station2Error(res, back) {
+  return res.status(400).render('input_error', {
+    message: '駅コード、駅名、0以上の乗車人数と距離を入力してください。指定するIDは未使用の正の整数にしてください。',
+    back
+  });
+}
+
 app.get('/keiyo2', (req, res) => {
   res.render('keiyo2', { data: station2 });
 });
 
-app.get('/keiyo2/:number', (req, res) => {
+app.get('/keiyo2/create', (req, res) => {
+  res.redirect('/public/keiyo2_new.html');
+});
+
+function findStation(req, res, next) {
   const number = Number(req.params.number);
-  if (!/^\d+$/.test(req.params.number) || !Number.isSafeInteger(number) ||
-      number >= station2.length) {
+  const station = station2[number];
+  if (!/^\d+$/.test(req.params.number) || !station) {
     return res.status(404).render('input_error', {
       message: '指定された駅は見つかりません。', back: '/keiyo2'
     });
   }
-  res.render('keiyo2_detail', { data: station2[number] });
+  res.locals.number = number;
+  res.locals.data = station;
+  next();
+}
+
+app.get('/keiyo2/:number', findStation, (req, res) => {
+  res.render('keiyo2_detail');
 });
 
-app.get('/keiyo2_add', (req, res) => {
-  const data = stationInput(req.query);
-  const change = inputText(req.query.change);
-  const passengerText = inputText(req.query.passengers);
-  const distanceText = inputText(req.query.distance);
-  const passengers = Number(passengerText);
-  const distance = Number(distanceText);
-  const back = '/public/keiyo2_add.html';
-  if (!data || station2.some(row => row.id === data.id) ||
-      !passengerText || !Number.isSafeInteger(passengers) || passengers < 0 ||
-      !distanceText || !Number.isFinite(distance) || distance < 0) {
-    return res.status(400).render('input_error', {
-      message: '未使用のID、駅コード、駅名、0以上の乗車人数と距離を入力してください。', back
-    });
+function addStation(res, fields, autoId) {
+  const data = station2Input(fields);
+  const givenId = inputText(fields.id);
+  let id = Number(givenId);
+  if (autoId && !givenId) {
+    id = station2.length + 1;
+    while (station2.some(row => row?.id === id)) id += 1;
   }
-  station2.push({ ...data, change, passengers, distance });
+  if (!data || !Number.isSafeInteger(id) || id <= 0 ||
+      station2.some(row => row?.id === id)) {
+    return station2Error(res, '/keiyo2/create');
+  }
+  station2.push({ id, ...data });
+  res.redirect('/keiyo2');
+}
+
+app.post('/keiyo2', (req, res) => addStation(res, req.body, true));
+app.get('/keiyo2_add', (req, res) => addStation(res, req.query, false));
+
+app.get('/keiyo2/edit/:number', findStation, (req, res) => {
+  res.render('keiyo2_edit');
+});
+
+app.post('/keiyo2/update/:number', findStation, (req, res) => {
+  const data = station2Input(req.body);
+  const { number } = res.locals;
+  if (!data) return station2Error(res, '/keiyo2/edit/' + number);
+  Object.assign(station2[number], data);
+  res.redirect('/keiyo2');
+});
+
+app.post('/keiyo2/delete/:number', findStation, (req, res) => {
+  // Keep the URLs of the remaining stations valid.
+  station2[res.locals.number] = null;
   res.redirect('/keiyo2');
 });
 
@@ -164,7 +216,11 @@ app.get('/pokemon', (req, res) => {
   res.render('pokemon', { data: pokemon });
 });
 
-app.get('/pokemon/:number', (req, res) => {
+app.get('/pokemon/create', (req, res) => {
+  res.redirect('/public/pokemon_add.html');
+});
+
+function findPokemon(req, res, next) {
   const number = Number(req.params.number);
   const detail = pokemon.find(row => row.number === number);
   if (!/^\d+$/.test(req.params.number) || !detail) {
@@ -172,25 +228,61 @@ app.get('/pokemon/:number', (req, res) => {
       message: '指定されたポケモンは見つかりません。', back: '/pokemon'
     });
   }
-  res.render('pokemon_detail', { data: detail });
+  res.locals.data = detail;
+  next();
+}
+
+app.get('/pokemon/:number', findPokemon, (req, res) => {
+  res.render('pokemon_detail');
 });
 
-app.get('/pokemon_add', (req, res) => {
-  const number = Number(inputText(req.query.number));
-  const name = inputText(req.query.name);
-  const type = inputText(req.query.type);
-  const category = inputText(req.query.category);
-  const height = Number(inputText(req.query.height));
-  const weight = Number(inputText(req.query.weight));
-  if (!Number.isSafeInteger(number) || number <= 0 ||
-      pokemon.some(row => row.number === number) || !name || !type || !category ||
-      !Number.isFinite(height) || height <= 0 || !Number.isFinite(weight) || weight <= 0) {
+function pokemonInput(fields) {
+  const name = inputText(fields.name);
+  const type = inputText(fields.type);
+  const category = inputText(fields.category);
+  const height = Number(inputText(fields.height));
+  const weight = Number(inputText(fields.weight));
+  if (!name || !type || !category || !Number.isFinite(height) || height <= 0 ||
+      !Number.isFinite(weight) || weight <= 0) return null;
+  return { name, type, category, height, weight };
+}
+
+function addPokemon(res, fields) {
+  const number = Number(inputText(fields.number));
+  const data = pokemonInput(fields);
+  if (!Number.isSafeInteger(number) || number <= 0 || !data ||
+      pokemon.some(row => row.number === number)) {
     return res.status(400).render('input_error', {
-      message: '未登録の図鑑番号と、名前・タイプ・分類・高さ・重さを入力してください。',
-      back: '/public/pokemon_add.html'
+      message: '未登録の図鑑番号と、名前・タイプ・分類・正の高さと重さを入力してください。',
+      back: '/pokemon/create'
     });
   }
-  pokemon.push({ number, name, type, category, height, weight });
+  pokemon.push({ number, ...data });
+  res.redirect('/pokemon');
+}
+
+app.post('/pokemon', (req, res) => addPokemon(res, req.body));
+app.get('/pokemon_add', (req, res) => addPokemon(res, req.query));
+
+app.get('/pokemon/edit/:number', findPokemon, (req, res) => {
+  res.render('pokemon_edit');
+});
+
+app.post('/pokemon/update/:number', findPokemon, (req, res) => {
+  const data = pokemonInput(req.body);
+  const detail = res.locals.data;
+  if (!data) {
+    return res.status(400).render('input_error', {
+      message: '名前・タイプ・分類・正の高さと重さを入力してください。',
+      back: '/pokemon/edit/' + detail.number
+    });
+  }
+  Object.assign(detail, data);
+  res.redirect('/pokemon');
+});
+
+app.post('/pokemon/delete/:number', findPokemon, (req, res) => {
+  pokemon.splice(pokemon.indexOf(res.locals.data), 1);
   res.redirect('/pokemon');
 });
 

@@ -2,7 +2,7 @@
   "name": "webpro-06",
   "version": "1.0.0",
   "private": true,
-  "description": "Webプログラミング 第7〜9回",
+  "description": "Webプログラミング 第7〜10回",
   "main": "app5.js",
   "scripts": {
     "start": "node app5.js"
