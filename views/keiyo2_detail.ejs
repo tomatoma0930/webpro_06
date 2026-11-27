@@ -18,6 +18,11 @@
       <tr><th scope="row">東京駅からの距離</th><td><%= data.distance %> km</td></tr>
     </tbody>
   </table>
+  <p><a href="/keiyo2/edit/<%= number %>">編集</a></p>
+  <form action="/keiyo2/delete/<%= number %>" method="post"
+        onsubmit="return confirm('このデータを削除しますか？')">
+    <button type="submit">削除</button>
+  </form>
   <p><a href="/keiyo2">駅一覧に戻る</a></p>
   <p><a href="/public/index.html">トップへ戻る</a></p>
 </body>

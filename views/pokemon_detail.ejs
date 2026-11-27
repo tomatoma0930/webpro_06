@@ -15,6 +15,11 @@
     <dt>高さ</dt><dd><%= data.height %> m</dd>
     <dt>重さ</dt><dd><%= data.weight %> kg</dd>
   </dl>
+  <p><a href="/pokemon/edit/<%= data.number %>">編集</a></p>
+  <form action="/pokemon/delete/<%= data.number %>" method="post"
+        onsubmit="return confirm('このデータを削除しますか？')">
+    <button type="submit">削除</button>
+  </form>
   <p><a href="/pokemon">図鑑に戻る</a></p>
   <p><a href="/public/index.html">トップへ戻る</a></p>
 </body>
